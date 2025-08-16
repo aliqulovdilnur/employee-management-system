@@ -41,6 +41,7 @@ public class DepartmentService {
 
     @Transactional
     public boolean deleteDepartment(Integer id) {
+
         if (!departmentRepository.existsById(id)) {
             throw new RuntimeException("Department not found with ID: " + id);
         }
