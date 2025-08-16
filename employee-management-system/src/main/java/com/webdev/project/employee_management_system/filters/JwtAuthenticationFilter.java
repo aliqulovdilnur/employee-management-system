@@ -1,7 +1,7 @@
 package com.webdev.project.employee_management_system.filters;
 
+import com.webdev.project.employee_management_system.services.CustomUserDetailService;
 import com.webdev.project.employee_management_system.utils.JwtUtil;
-import com.webdev.project.employee_management_system.services.CustomUserDetailService ;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,15 +35,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username = null;
         String jwtToken = null;
 
+        // Extract JWT token from header
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwtToken = authHeader.substring(7);
             username = jwtUtil.extractUsername(jwtToken);
         }
 
+        System.out.println("Auth header: " + authHeader);
+        System.out.println("Extracted username: " + username);
+
+
+        // Authenticate user if username exists and no authentication set yet
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            if (jwtUtil.validateToken(jwtToken, String.valueOf(userDetails))) {
+            // Validate token using username
+            if (jwtUtil.validateToken(jwtToken, userDetails.getUsername())) {
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
