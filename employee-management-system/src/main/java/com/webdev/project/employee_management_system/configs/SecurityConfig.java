@@ -15,7 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -33,6 +32,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http) throws Exception {
         http
+                // CORS setup
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowedOrigins(List.of("http://localhost:5173"));
@@ -42,12 +42,30 @@ public class SecurityConfig {
                     return configuration;
                 }))
                 .csrf(csrf -> csrf.disable())
+
+                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
+                        // Public endpoints
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/departments/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/departments/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/departments/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/employees/**").hasRole("ADMIN")
+
+                        // ADMIN-only endpoints
+                        .requestMatchers(HttpMethod.POST, "/api/departments/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/departments/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/departments/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/employees/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/employees/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasAuthority("ADMIN")
+
+                        // HR_MANAGER endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/employees/**").hasAnyAuthority("HR_MANAGER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/leave-requests/**").hasAnyAuthority("HR_MANAGER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/leave-requests/**").hasAnyAuthority("HR_MANAGER", "ADMIN")
+
+                        // EMPLOYEE endpoints
+                        .requestMatchers(HttpMethod.POST, "/api/leave-requests/**").hasAnyAuthority("EMPLOYEE", "HR_MANAGER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/leave-requests/my/**").hasAuthority("EMPLOYEE")
+
+                        // Any other request requires authentication
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
