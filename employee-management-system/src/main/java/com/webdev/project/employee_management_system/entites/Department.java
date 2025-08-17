@@ -17,15 +17,23 @@ public class Department {
     @Column(name = "location")
     private String location;
 
-    // Constructors
+    // Default constructor
     public Department() {}
 
+    // Constructor with all fields
+    public Department(Integer departmentId, String departmentName, String location) {
+        this.departmentId = departmentId;
+        this.departmentName = departmentName;
+        this.location = location;
+    }
+
+    // Constructor without ID (for creating new departments)
     public Department(String departmentName, String location) {
         this.departmentName = departmentName;
         this.location = location;
     }
 
-    // Getters & Setters
+    // Getters and Setters
     public Integer getDepartmentId() {
         return departmentId;
     }
