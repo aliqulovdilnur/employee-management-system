@@ -1,6 +1,10 @@
 package com.webdev.project.employee_management_system.utils;
 
 public class ErrorDetail {
+
+    private String code;
+    private String message;
+
     public String getCode() {
         return code;
     }
@@ -17,13 +21,10 @@ public class ErrorDetail {
         this.message = message;
     }
 
-    private String code;
-    private String message;
-
     public ErrorDetail(String code, String message) {
         this.code = code;
         this.message = message;
     }
 
-    // getters
+
 }

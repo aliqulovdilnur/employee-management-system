@@ -27,7 +27,7 @@ public class User {
     private Role role;
 
     @OneToOne(mappedBy = "user")
-    private Employee employee; // optional: links back to Employee
+    private Employee employee;
 
     // Default constructor
     public User() {}
