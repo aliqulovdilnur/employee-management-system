@@ -36,25 +36,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
 
         String username = null;
+        String role = null;
         String token = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            username = jwtUtil.extractUsername(token);
-        }
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Extract role from token
-            String role = jwtUtil.extractRole(token); // make sure JwtUtil has this method
+                // Extract username and role from JWT
+                username = jwtUtil.extractUsername(token);
+                role = jwtUtil.extractRole(token);
 
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role))
-                    );
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+                // Debug logs
+                System.out.println("JWT username: " + username);
+                System.out.println("JWT role: " + role);
+            }
+
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (jwtUtil.validateToken(token, username)) {
+                    // Set Authentication with authority matching SecurityConfig
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    username,
+                                    null,
+                                    Collections.singleton(new SimpleGrantedAuthority(role)) // plain authority
+                            );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    System.out.println("Authentication set successfully for user: " + username);
+                    System.out.println("Granted Authorities: " + authToken.getAuthorities());
+                } else {
+                    System.out.println("Invalid JWT token for user: " + username);
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error in JWT filter: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);

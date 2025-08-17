@@ -35,7 +35,7 @@ public class DepartmentController {
         }
     }
 
-    // ---------------- Get Department by ID ----------------
+    //  Get Department by ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getDepartmentById(@PathVariable Integer id) {
         try {
@@ -52,7 +52,7 @@ public class DepartmentController {
         }
     }
 
-    // ---------------- Create Department ----------------
+    // Create Department
     @PostMapping
     public ResponseEntity<?> createDepartment(@RequestBody Department department) {
         try {
@@ -64,7 +64,7 @@ public class DepartmentController {
         }
     }
 
-    // ---------------- Update Department ----------------
+    //  Update Department
     @PutMapping("/{id}")
     public ResponseEntity<?> updateDepartment(@PathVariable Integer id, @RequestBody Department department) {
         try {
@@ -79,7 +79,7 @@ public class DepartmentController {
         }
     }
 
-    // ---------------- Delete Department ----------------
+    //  Delete Department
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDepartment(@PathVariable Integer id) {
         try {
